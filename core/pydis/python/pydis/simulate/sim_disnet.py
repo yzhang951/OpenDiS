@@ -28,7 +28,7 @@ class SimulateNetwork:
     """
     def __init__(self, state: dict, calforce=None,
                  mobility=None, timeint=None, topology=None,
-                 collision=None, remesh=None, vis=None,
+                 collision=None, remesh=None, vis=None, diag=None,
                  dt0: float=1.0e-8,
                  max_step: int=10,
                  loading_mode: str=None,
@@ -47,6 +47,7 @@ class SimulateNetwork:
         self.collision = collision
         self.remesh = remesh
         self.vis = vis
+        self.diag = diag
         self.dt0 = dt0
         self.max_step = max_step
         self.loading_mode = loading_mode
@@ -105,7 +106,12 @@ class SimulateNetwork:
 
             if self.print_freq != None:
                 if tstep % self.print_freq == 0:
-                    print("step = %d dt = %e"%(tstep, self.timeint.dt))
+                    if self.diag == None:
+                        print("step = %d dt = %e"%(tstep, self.timeint.dt))
+                    else:
+                        for compute_prop in self.diag:
+                            props = compute_prop(G, state)
+                        print(*[tstep,*props], sep='\t')
 
             G = DM.get_disnet(DisNet)
             if self.plot_freq != None:
