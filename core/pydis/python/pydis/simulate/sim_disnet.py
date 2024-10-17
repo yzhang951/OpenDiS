@@ -28,7 +28,7 @@ class SimulateNetwork:
     """
     def __init__(self, state: dict, calforce=None,
                  mobility=None, timeint=None, topology=None,
-                 collision=None, remesh=None, vis=None, diag=None,
+                 collision=None, remesh=None, cross_slip=None, diag=None, vis=None,
                  dt0: float=1.0e-8,
                  max_step: int=10,
                  loading_mode: str=None,
@@ -46,6 +46,7 @@ class SimulateNetwork:
         self.topology = topology
         self.collision = collision
         self.remesh = remesh
+        self.cross_slip = cross_slip
         self.vis = vis
         self.diag = diag
         self.dt0 = dt0
@@ -68,10 +69,13 @@ class SimulateNetwork:
 
         state = self.mobility.Mobility(DM, state)
 
-        # using a constant time step (for now)
         state = self.timeint.Update(DM, state)
-
-        state = self.topology.Handle(DM, state)
+        
+        if self.cross_slip is not None:
+            self.cross_slip.Handle(DM, state)
+        
+        if self.topology is not None:
+            state = self.topology.Handle(DM, state)
 
         if self.collision is not None:
             state = self.collision.HandleCol(DM, state)
